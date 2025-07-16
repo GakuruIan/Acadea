@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 import { motion } from "motion/react";
 
@@ -21,6 +21,8 @@ import {
 //toast
 import { toast } from "sonner";
 
+import { useUser } from "@clerk/nextjs";
+
 import { Form } from "@/components/ui/form";
 
 // onboarding components
@@ -36,6 +38,8 @@ import BasicInfo from "./components/BasicInfo";
 import TutorReview from "./components/tutor/TutorReview";
 
 import RolePicker from "./components/RolePicker";
+import Loader from "@/components/ui/Loader/Loader";
+import { useRouter } from "next/navigation";
 
 const getStepConfig = (role: string) => {
   const steps = [
@@ -170,10 +174,20 @@ const getDefaultValues = (role: string) => {
 };
 
 const Page = () => {
-  const [currentStep, setCurrentStep] = React.useState(0);
-  const [currentRole, setCurrentRole] = React.useState<"student" | "tutor">(
+  const [currentStep, setCurrentStep] = useState(0);
+  const [currentRole, setCurrentRole] = useState<"student" | "tutor">(
     "student"
   );
+  const router = useRouter();
+
+  const { isLoaded, isSignedIn } = useUser();
+
+  useEffect(() => {
+    if (!isSignedIn) {
+      router.replace("/login");
+    }
+  }, [isSignedIn, router]);
+
   const schema = React.useMemo(() => {
     return getValidationSchema(currentRole, currentStep + 1);
   }, [currentRole, currentStep]);
@@ -191,7 +205,7 @@ const Page = () => {
     name: "role",
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (watchedRole && watchedRole !== currentRole) {
       const prevValues = form.getValues();
 
@@ -285,6 +299,10 @@ const Page = () => {
   };
 
   const isLastStep = currentStep === steps.length - 1;
+
+  if (!isLoaded) {
+    return <Loader />;
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 w-full max-w-2xl  mx-auto ">

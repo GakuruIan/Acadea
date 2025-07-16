@@ -4,6 +4,8 @@ import "./globals.css";
 
 import { Toaster } from "sonner";
 
+import { ClerkProvider } from "@clerk/nextjs";
+
 const poppinsBold = localFont({
   src: "./fonts/Poppins-Bold.woff",
   variable: "--font-poppins-bold",
@@ -43,13 +45,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${poppinsRegular.variable} ${poppinsLight.variable}  ${poppinsSemiBold.variable} ${poppinsBold.variable} ${saira.variable} ${sairaLight.variable} `}
-      >
-        {children}
-        <Toaster />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body
+          className={`${poppinsRegular.variable} ${poppinsLight.variable}  ${poppinsSemiBold.variable} ${poppinsBold.variable} ${saira.variable} ${sairaLight.variable} `}
+        >
+          {children}
+          <Toaster />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

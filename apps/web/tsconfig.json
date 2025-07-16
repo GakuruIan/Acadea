@@ -8,7 +8,8 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+       "@repo/supabase": ["../../packages/supabase/src"]
     }
   },
   "include": [

@@ -1,6 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+
+// supabase
+import { useSignUp, useUser } from "@clerk/nextjs";
 
 // form utils
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,12 +25,16 @@ import {
 // components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Verification from "@/components/ui/OTP/Verification";
+import Spinner from "@/components/ui/spinner/spinner";
+import Loader from "@/components/ui/Loader/Loader";
 
 // icons
 import { GalleryVerticalEnd } from "lucide-react";
 
 // routing
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 //validation schema
 const registerSchema = z
@@ -55,6 +62,18 @@ const registerSchema = z
   });
 
 const Page = () => {
+  const [verifing, setVerifing] = useState(false);
+
+  const router = useRouter();
+  const { isLoaded, signUp } = useSignUp();
+  const { isSignedIn } = useUser();
+
+  useEffect(() => {
+    if (isSignedIn) {
+      router.replace("/");
+    }
+  }, [isSignedIn, router]);
+
   const form = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -64,11 +83,43 @@ const Page = () => {
     },
   });
 
+  const onSubmit = async (values: z.infer<typeof registerSchema>) => {
+    const { email, password } = values;
+
+    if (!isLoaded) return <Loader />;
+
+    return toast.promise(
+      (async () => {
+        await signUp.create({
+          emailAddress: email,
+          password,
+        });
+
+        await signUp.prepareEmailAddressVerification({
+          strategy: "email_code",
+        });
+        setVerifing(true);
+      })(),
+      {
+        loading: "Creating account...",
+        success: "Check your inbox to confirm your email.",
+        error: (err: Error) => err.message,
+        position: "top-center",
+      }
+    );
+  };
+
+  const isSubmitting = form.formState.isSubmitting;
+
+  if (verifing) {
+    return <Verification />;
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen p-8">
       <div className="flex flex-col gap-6">
         <Form {...form}>
-          <form>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center gap-2">
                 <a
@@ -149,7 +200,7 @@ const Page = () => {
                         <FormControl>
                           <Input
                             id="confirmPassword"
-                            type="confirmPassword"
+                            type="password"
                             placeholder="********"
                             autoComplete="off"
                             {...field}
@@ -165,8 +216,19 @@ const Page = () => {
                   type="submit"
                   variant="default"
                   className="w-full text-sm font-semibold tracking-wider"
+                  disabled={isSubmitting}
                 >
-                  Sign up
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-x-3">
+                      <Spinner
+                        variant="xs"
+                        classname="dark:text-neutral-400 dark:fill-neutral-600"
+                      />
+                      <p className=" ">Signing up...</p>
+                    </div>
+                  ) : (
+                    "Sign up"
+                  )}
                 </Button>
               </div>
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">

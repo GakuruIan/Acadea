@@ -1,12 +1,10 @@
 "use client";
-import React, { useState } from "react";
-
-import { cn } from "@/lib/utils";
+import React, { useEffect, useState } from "react";
 
 // components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import Spinner from "@/components/ui/spinner/spinner";
 
 // icons
 import { GalleryVerticalEnd } from "lucide-react";
@@ -17,6 +15,9 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
+
+// clerk
+import { useSignIn, useUser } from "@clerk/nextjs";
 
 //toast
 import { toast } from "sonner";
@@ -30,6 +31,10 @@ import {
   FormMessage,
   FormDescription,
 } from "@/components/ui/form";
+import Loader from "@/components/ui/Loader/Loader";
+
+// routing
+import { useRouter } from "next/navigation";
 
 //validation schema
 const loginSchema = z.object({
@@ -53,6 +58,18 @@ const loginSchema = z.object({
 const Page = () => {
   const [step, setStep] = useState(1);
 
+  const router = useRouter();
+  const { isLoaded: isSignLoaded, signIn, setActive } = useSignIn();
+  const { isLoaded: isUserLoaded, isSignedIn } = useUser();
+
+  const isLoaded = isSignLoaded && isUserLoaded;
+
+  useEffect(() => {
+    if (isSignedIn) {
+      router.replace("/dashboard");
+    }
+  }, [isSignedIn, router]);
+
   const form = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -61,15 +78,60 @@ const Page = () => {
     },
   });
 
-  const handleNextStep = () => {
+  const handleNextStep = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const isValid = await form.trigger("email");
+    if (!isValid) return;
     setStep(2);
   };
+
+  if (!isLoaded) {
+    return <Loader />;
+  }
+
+  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+    const { email, password } = values;
+
+    toast.promise(
+      (async () => {
+        try {
+          const signInAttempt = await signIn.create({
+            identifier: email,
+            password,
+          });
+
+          if (signInAttempt.status === "complete") {
+            await setActive({ session: signInAttempt.createdSessionId });
+            router.replace("/dashboard");
+          } else {
+            console.error("Sign-in requires further steps:", signInAttempt);
+            throw new Error("Sign-in requires further verification.");
+          }
+        } catch (error: any) {
+          // 👇 Reset to email step
+          setStep(1);
+          form.setValue("password", "");
+
+          throw new Error(
+            error?.errors?.[0]?.longMessage || error.message || "Login failed"
+          );
+        }
+      })(),
+      {
+        loading: "Signing in...",
+        success: "Login successful!",
+        error: (err: Error) => err.message,
+        position: "top-center",
+      }
+    );
+  };
+  const isSubmitting = form.formState.isSubmitting;
 
   return (
     <div className="flex items-center justify-center min-h-screen p-8">
       <div className="flex flex-col gap-6">
         <Form {...form}>
-          <form>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center gap-2">
                 <a
@@ -114,13 +176,19 @@ const Page = () => {
                               {...field}
                             />
                           </FormControl>
-                          <FormDescription>
+                          <FormDescription className="flex items-center justify-between">
                             Enter the email you used to sign up.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+                    <Link
+                      href="/forgot-password"
+                      className="text-sm text-right dark:text-neutral-400 hover:underline"
+                    >
+                      Forgot your password?
+                    </Link>
                   </div>
                 )}
 
@@ -128,7 +196,7 @@ const Page = () => {
                   <div className="grid gap-3">
                     <FormField
                       control={form.control}
-                      name="email"
+                      name="password"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="tracking-wider text-sm">
@@ -156,15 +224,35 @@ const Page = () => {
                     </Link>
                   </div>
                 )}
-
-                <Button
-                  type={step === 1 ? "button" : "submit"}
-                  variant="default"
-                  className="w-full text-sm font-semibold tracking-wider"
-                  onClick={step === 1 ? handleNextStep : undefined}
-                >
-                  {step === 1 ? "Continue" : "Sign In"}
-                </Button>
+                {step !== 2 ? (
+                  <Button
+                    type="button"
+                    variant="default"
+                    className="w-full text-sm font-semibold tracking-wider"
+                    onClick={handleNextStep}
+                    disabled={
+                      !form.watch("email") ||
+                      Boolean(form.formState.errors.email)
+                    }
+                  >
+                    Continue
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    variant="default"
+                    className="w-full text-sm font-semibold tracking-wider"
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center gap-x-3">
+                        <Spinner variant="xs" />
+                        <p className=" ">Signing up...</p>
+                      </div>
+                    ) : (
+                      "Sign in"
+                    )}
+                  </Button>
+                )}
               </div>
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="dark:bg-neutral-900 text-muted-foreground relative z-10 px-2">
