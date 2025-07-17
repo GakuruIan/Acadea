@@ -52,8 +52,12 @@ export const step1Schema = z.object({
 // Step 2: Student Education & Goals
 export const studentStep2Schema = z.object({
   studentEducationLevel: z.enum(
-    ["high_school", "bachelor", "master"],
+    ["high_school", "bachelor", "master", "phd"],
     "Education Level is required"
+  ),
+  studentEducationStatus: z.enum(
+    ["graduated", "full_time", "part_time", "academic_break", "dropped_out"],
+    "Education status is required"
   ),
   fieldOfStudy: z
     .string()
@@ -61,15 +65,17 @@ export const studentStep2Schema = z.object({
     .max(100, "Field of study must be at most 100 characters"),
   academicGoals: z.enum(
     [
-      "degree_completion",
-      "skill_building",
-      "career_change",
-      "pass_exam",
-      "get_job",
+      "improve_grades",
+      "exam_preparation",
+      "skill_development",
+      "career_advancement",
+      "personal_interest",
     ],
-    "Academic goal is required"
+    {
+      error: "Academic goal is required ",
+    }
   ),
-  institution: z
+  nameofInstitution: z
     .string()
     .trim()
     .min(1, "Name of institution is required")
@@ -94,7 +100,7 @@ export const studentStep2Schema = z.object({
 // Step 3: Student Preferences
 export const studentStep3Schema = z.object({
   languagePreference: z.enum(
-    ["english", "spanish", "french"],
+    ["english", "spanish", "french", "arabic", "other"],
     "Language preference is required"
   ),
   learningStyle: z.enum(
@@ -102,12 +108,14 @@ export const studentStep3Schema = z.object({
       "visual",
       "auditory",
       "kinesthetic",
-      "reading",
+      "reading_writing",
       "live_classes",
       "self_paced",
       "group_discussion",
     ],
-    "Learning style is required"
+    {
+      error: "Learning style is required",
+    }
   ),
   preferredSchedule: z.enum(
     ["morning", "afternoon", "evening", "flexible"],
@@ -133,6 +141,7 @@ export const studentStep3Schema = z.object({
       "assignment_and_projects",
       "discussions",
       "live_oral_questioning",
+      "peer_review",
     ],
     "mode of engagment is required"
   ),
@@ -273,30 +282,96 @@ export const basicSchema = z.object({
 
 export const studentSchema = basicSchema.extend({
   studentEducationLevel: z.enum(
-    ["high_school", "bachelor", "master"],
+    ["high_school", "bachelor", "master", "phd"],
     "Education Level is required"
   ),
   fieldOfStudy: z
     .string()
     .min(2, "Field of study must be at least 2 characters")
     .max(100, "Field of study must be at most 100 characters"),
+  nameofInstitution: z
+    .string()
+    .min(2, "Name your school institution is required")
+    .max(100, "Name of institution cannot be more than 100 characters"),
+  studentEducationStatus: z.enum(
+    ["graduated", "full_time", "part_time", "academic_break", "dropped_out"],
+    "Education status is required"
+  ),
   academicGoals: z.enum(
-    ["degree_completion", "skill_building", "career_change"],
-    "Academic goal is required"
+    [
+      "improve_grades",
+      "exam_preparation",
+      "skill_development",
+      "career_advancement",
+      "personal_interest",
+    ],
+    {
+      error: "Academic goal is required ",
+    }
   ),
   languagePreference: z.enum(
-    ["english", "spanish", "french"],
+    ["english", "spanish", "french", "arabic", "other"],
     "Language preference is required"
   ),
+
   learningStyle: z.enum(
-    ["visual", "auditory", "kinesthetic", "reading"],
-    "Learning style is required"
+    [
+      "visual",
+      "auditory",
+      "kinesthetic",
+      "reading_writing",
+      "live_classes",
+      "self_paced",
+      "group_discussion",
+    ],
+    {
+      error: "Learning style is required",
+    }
   ),
   preferredSchedule: z.enum(
     ["morning", "afternoon", "evening", "flexible"],
     "Preferred schedule is required"
   ),
   interests: z.array(z.string()).min(3, "You must select at least 3 interests"),
+  academicYear: z.enum(
+    [
+      "highschool_freshman",
+      "highschool_sophomore",
+      "highschool_junior",
+      "highschool_senior",
+      "undergraduate_year1",
+      "undergraduate_year2",
+      "undergraduate_year3",
+      "undergraduate_year4",
+      "postgraduate",
+      "not_applicable",
+    ],
+    " Current Academic Year or Level is required"
+  ),
+  deviceAccess: z.enum(
+    ["mobile", "laptop", "tablet", "desktop"],
+    "Device access is required"
+  ),
+  internetAccessQuality: z.enum(
+    ["poor", "moderate", "reliable"],
+    "Internet quality is required"
+  ),
+  preferredPace: z.enum(
+    ["slow", "normal", "fast"],
+    "Learning speed is required"
+  ),
+
+  focusDuration: z.enum(["15", "30", "60", "90+"], "Focus span is required"),
+  engagementPreference: z.enum(
+    [
+      "quizzes_and_test",
+      "assignment_and_projects",
+      "discussions",
+      "live_oral_questioning",
+      "peer_review",
+    ],
+    "mode of engagment is required"
+  ),
 });
 
 export const tutorSchema = basicSchema.extend({

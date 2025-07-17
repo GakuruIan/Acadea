@@ -46,8 +46,8 @@ const formSchema = z.object({
 const OTPverification = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
   const [showResendBtn, setShowResendBtn] = useState(false);
-
-  const [sendingCode, setSendingCode] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [_, setSendingCode] = useState(false);
 
   const router = useRouter();
 
@@ -79,7 +79,7 @@ const OTPverification = () => {
 
   const handleVerification = async (values: z.infer<typeof formSchema>) => {
     const { code } = values;
-
+    setIsLoading(true);
     if (!isLoaded) return;
 
     try {
@@ -115,10 +115,10 @@ const OTPverification = () => {
         description: JSON.stringify(error?.errors[0]?.longMessage, null, 2),
       });
       console.error("Error:", JSON.stringify(error, null, 2));
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  const isLoading = form.formState.isSubmitting;
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 w-full max-w-2xl  mx-auto ">
@@ -184,7 +184,7 @@ const OTPverification = () => {
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-x-3">
-                      <Spinner variant="xs" />
+                      <Spinner size="xs" variant="button" />
                       <p className=" ">Verifing...</p>
                     </div>
                   ) : (

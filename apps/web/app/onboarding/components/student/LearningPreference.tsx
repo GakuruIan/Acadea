@@ -27,6 +27,7 @@ interface Props {
 const LearningPreference = ({ form }: Props) => {
   return (
     <div>
+      {/* language preference */}
       <div className="mb-6">
         <FormField
           control={form.control}
@@ -50,6 +51,8 @@ const LearningPreference = ({ form }: Props) => {
                       <SelectItem value="english">English</SelectItem>
                       <SelectItem value="spanish">Spanish</SelectItem>
                       <SelectItem value="french">French</SelectItem>
+                      <SelectItem value="arabic">Arabic</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -61,6 +64,7 @@ const LearningPreference = ({ form }: Props) => {
         />
       </div>
 
+      {/* learning style */}
       <div className="mb-6">
         <FormField
           control={form.control}
@@ -73,7 +77,7 @@ const LearningPreference = ({ form }: Props) => {
               <FormControl>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value ?? ""}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder=" Your Preferred Learning Style" />
@@ -82,7 +86,9 @@ const LearningPreference = ({ form }: Props) => {
                     <SelectItem value="visual">Visual</SelectItem>
                     <SelectItem value="auditory">Auditory</SelectItem>
                     <SelectItem value="kinesthetic">Kinesthetic</SelectItem>
-                    <SelectItem value="reading">Reading/Writing</SelectItem>
+                    <SelectItem value="reading_writing">
+                      Reading/Writing
+                    </SelectItem>
                     <SelectItem value="live_classes">Live classes</SelectItem>
                     <SelectItem value="self_paced">Self paced</SelectItem>
                     <SelectItem value="group_discussion">
@@ -97,6 +103,7 @@ const LearningPreference = ({ form }: Props) => {
         />
       </div>
 
+      {/* preferred schedule */}
       <div className="mb-6">
         <FormField
           control={form.control}
@@ -128,6 +135,7 @@ const LearningPreference = ({ form }: Props) => {
         />
       </div>
 
+      {/* device access */}
       <div className="mb-6">
         <FormField
           control={form.control}
@@ -159,6 +167,7 @@ const LearningPreference = ({ form }: Props) => {
         />
       </div>
 
+      {/* internet accessibility */}
       <div className="mb-6">
         <FormField
           control={form.control}
@@ -189,6 +198,7 @@ const LearningPreference = ({ form }: Props) => {
         />
       </div>
 
+      {/* preferred pace */}
       <div className="mb-6">
         <FormField
           control={form.control}
@@ -219,6 +229,7 @@ const LearningPreference = ({ form }: Props) => {
         />
       </div>
 
+      {/* focus duration */}
       <div className="mb-6">
         <FormField
           control={form.control}

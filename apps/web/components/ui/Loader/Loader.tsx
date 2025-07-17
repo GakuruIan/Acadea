@@ -5,7 +5,7 @@ import Spinner from "../spinner/spinner";
 const Loader = () => {
   return (
     <div className="min-h-screen  flex items-center justify-center">
-      <Spinner variant="sm" />
+      <Spinner size="sm" />
     </div>
   );
 };

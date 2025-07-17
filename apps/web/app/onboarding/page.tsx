@@ -1,6 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
 
+import type { Database } from "@repo/supabase-types";
+
+type StudentProfileInsert =
+  Database["public"]["Tables"]["student_profiles"]["Insert"];
+
 import { motion } from "motion/react";
 
 import { ArrowRight, ArrowLeft } from "lucide-react";
@@ -40,6 +45,8 @@ import TutorReview from "./components/tutor/TutorReview";
 import RolePicker from "./components/RolePicker";
 import Loader from "@/components/ui/Loader/Loader";
 import { useRouter } from "next/navigation";
+
+import { supabaseClient } from "@/lib/supabase/client";
 
 const getStepConfig = (role: string) => {
   const steps = [
@@ -178,15 +185,18 @@ const Page = () => {
   const [currentRole, setCurrentRole] = useState<"student" | "tutor">(
     "student"
   );
+  const [isLoading, setIsLoading] = useState(false);
+
   const router = useRouter();
+  const supabase = supabaseClient();
 
   const { isLoaded, isSignedIn } = useUser();
 
   useEffect(() => {
-    if (!isSignedIn) {
+    if (isLoaded && !isSignedIn) {
       router.replace("/login");
     }
-  }, [isSignedIn, router]);
+  }, [isSignedIn, router, isLoaded]);
 
   const schema = React.useMemo(() => {
     return getValidationSchema(currentRole, currentStep + 1);
@@ -194,6 +204,7 @@ const Page = () => {
 
   const form = useForm({
     resolver: zodResolver(schema),
+
     reValidateMode: "onChange",
     defaultValues: getDefaultValues(currentRole) as
       | StudentFormSchema
@@ -274,7 +285,7 @@ const Page = () => {
         case 4:
           return <Interest control={form.control} />;
         case 5:
-          return <StudentReview />;
+          return <StudentReview form={form} />;
         default:
           return null;
       }
@@ -303,6 +314,37 @@ const Page = () => {
   if (!isLoaded) {
     return <Loader />;
   }
+
+  const onSubmit = async (values: z.infer<StudentFormSchema>) => {
+    const role = form.getValues("role");
+
+    setIsLoading(true);
+
+    const formData = form.getValues();
+
+    console.log(formData);
+    toast.promise(
+      (async () => {
+        try {
+          if (role === "student") {
+            const { error } = await supabase
+              .from("student_profiles")
+              .insert(formData);
+            if (error) {
+              throw error;
+            }
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      })(),
+      {
+        loading: "Submitting...",
+        success: "User data saved successfully",
+        error: (error) => error.message,
+      }
+    );
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 w-full max-w-2xl  mx-auto ">
@@ -336,40 +378,38 @@ const Page = () => {
 
           <div className="">
             <Form {...form}>
-              <form>{renderStepContent()}</form>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                {renderStepContent()}
+                <div className="flex items-center justify-between mt-4 w-full">
+                  {currentStep > 0 && (
+                    <Button onClick={handleBack} variant="outline">
+                      <ArrowLeft size={16} className="" />
+                      Back
+                    </Button>
+                  )}
+
+                  {isLastStep ? (
+                    <Button
+                      type="submit"
+                      className="flex justify-end"
+                      variant="default"
+                    >
+                      Submit
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      className="flex justify-end"
+                      onClick={handleNext}
+                      variant="default"
+                    >
+                      Next
+                      <ArrowRight />
+                    </Button>
+                  )}
+                </div>
+              </form>
             </Form>
-          </div>
-
-          <div className="flex items-center justify-between mt-4 w-full">
-            {currentStep > 0 && (
-              <Button onClick={handleBack} variant="outline">
-                <ArrowLeft size={16} className="" />
-                Back
-              </Button>
-            )}
-
-            {isLastStep ? (
-              <Button
-                type="submit"
-                className="flex justify-end"
-                onClick={() => {
-                  console.log("submitting");
-                }}
-                variant="default"
-              >
-                Submit
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                className="flex justify-end"
-                onClick={handleNext}
-                variant="default"
-              >
-                Next
-                <ArrowRight />
-              </Button>
-            )}
           </div>
         </div>
       </div>

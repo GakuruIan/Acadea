@@ -57,7 +57,7 @@ const loginSchema = z.object({
 
 const Page = () => {
   const [step, setStep] = useState(1);
-
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { isLoaded: isSignLoaded, signIn, setActive } = useSignIn();
   const { isLoaded: isUserLoaded, isSignedIn } = useUser();
@@ -91,8 +91,8 @@ const Page = () => {
 
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
     const { email, password } = values;
-
-    toast.promise(
+    setIsLoading(true);
+    return toast.promise(
       (async () => {
         try {
           const signInAttempt = await signIn.create({
@@ -104,17 +104,16 @@ const Page = () => {
             await setActive({ session: signInAttempt.createdSessionId });
             router.replace("/dashboard");
           } else {
-            console.error("Sign-in requires further steps:", signInAttempt);
             throw new Error("Sign-in requires further verification.");
           }
         } catch (error: any) {
-          // 👇 Reset to email step
           setStep(1);
           form.setValue("password", "");
-
           throw new Error(
             error?.errors?.[0]?.longMessage || error.message || "Login failed"
           );
+        } finally {
+          setIsLoading(false);
         }
       })(),
       {
@@ -125,7 +124,6 @@ const Page = () => {
       }
     );
   };
-  const isSubmitting = form.formState.isSubmitting;
 
   return (
     <div className="flex items-center justify-center min-h-screen p-8">
@@ -242,10 +240,11 @@ const Page = () => {
                     type="submit"
                     variant="default"
                     className="w-full text-sm font-semibold tracking-wider"
+                    disabled={isLoading}
                   >
-                    {isSubmitting ? (
+                    {isLoading ? (
                       <div className="flex items-center gap-x-3">
-                        <Spinner variant="xs" />
+                        <Spinner size="xs" variant="button" />
                         <p className=" ">Signing up...</p>
                       </div>
                     ) : (

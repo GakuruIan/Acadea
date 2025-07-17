@@ -98,7 +98,7 @@ const FileUpload = ({
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 10 }}
                           transition={{ duration: 0.25 }}
-                          className="flex items-center justify-between dark:bg-neutral-500/10 bg-gray-500 rounded-md px-2 py-1.5 mt-1.5"
+                          className="flex items-center justify-between dark:bg-neutral-500/10 bg-gray-200 rounded-md px-2 py-1.5 mt-1.5"
                         >
                           <div className="flex items-center gap-x-1.5 truncate">
                             {isImage ? (
@@ -124,7 +124,7 @@ const FileUpload = ({
                           <button
                             onClick={() => handleRemoveFile(index)}
                             type="button"
-                            className="p-1.5 rounded-md bg-gray-400 dark:bg-neutral-500/10 cursor-pointer hover:dark:bg-neutral-500/20 hover:bg-gray-500 transition-colors duration-75"
+                            className="p-1.5 rounded-md bg-gray-300 dark:bg-neutral-500/10 cursor-pointer hover:dark:bg-neutral-500/20 hover:bg-gray-500 transition-colors duration-75"
                           >
                             <X size={18} className="dark:text-neutral-400" />
                           </button>

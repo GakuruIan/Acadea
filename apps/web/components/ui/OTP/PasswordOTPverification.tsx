@@ -1,46 +1,48 @@
 "use client";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-// clerk
-import { useSignUp } from "@clerk/nextjs";
+// components
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Spinner from "@/components/ui/spinner/spinner";
 
 // icons
 import { GalleryVerticalEnd } from "lucide-react";
 
-// zod
-import * as z from "zod";
+import Link from "next/link";
+
+// form utils
 import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { useForm } from "react-hook-form";
 
-// router
-import { useRouter } from "next/navigation";
+// clerk
+import { useSignIn, useUser } from "@clerk/nextjs";
+
+//toast
+import { toast } from "sonner";
 
 // components
-import Spinner from "../spinner/spinner";
-import { Button } from "../button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import Loader from "@/components/ui/Loader/Loader";
 
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { Input } from "../input";
 
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+// routing
+import { useRouter } from "next/navigation";
 
-import Link from "next/link";
-
-// toast
-import { toast } from "sonner";
-
+//validation schema
 const formSchema = z.object({
   code: z.string().min(6, {
     message: "Your one-time code must be 6 characters.",
@@ -56,16 +58,25 @@ const formSchema = z.object({
       /[@$!%*?&]/,
       "Password must contain at least one special character (@, $, !, %, *, ?, &)."
     ),
+  confirmPassword: z.string(),
 });
 
-// TODO:add password otp verification
-const OTPverification = () => {
-  const { isLoaded, signUp, setActive } = useSignUp();
-  const [showResendBtn, setShowResendBtn] = useState(false);
+const Page = () => {
   const [step, setStep] = useState(1);
-  const [sendingCode, setSendingCode] = useState(false);
+  const [showResendBtn, setShowResendBtn] = useState(false);
+  const [isLoading, setIsloading] = useState(false);
 
   const router = useRouter();
+  const { isLoaded: isSignLoaded, signIn, setActive } = useSignIn();
+  const { isLoaded: isUserLoaded, isSignedIn } = useUser();
+
+  const isLoaded = isSignLoaded && isUserLoaded;
+
+  useEffect(() => {
+    if (isSignedIn) {
+      router.replace("/dashboard");
+    }
+  }, [isSignedIn, router]);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -75,194 +86,217 @@ const OTPverification = () => {
     },
   });
 
-  const handleResendCode = () => {
-    setSendingCode(true);
-    return toast.promise(
-      (async () => {
-        await signUp?.prepareEmailAddressVerification({
-          strategy: "email_code",
-        });
-        setSendingCode(false);
-        setShowResendBtn(false);
-      })(),
-      {
-        loading: "Resending code...",
-        success: "Verification code successfully",
-        error: "An error has occurred",
-        position: "top-center",
-      }
-    );
+  const handleNextStep = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const isValid = await form.trigger("code");
+    if (!isValid) return;
+    setStep(2);
   };
+
+  if (!isLoaded) {
+    return <Loader />;
+  }
 
   const handleVerification = async (values: z.infer<typeof formSchema>) => {
     const { code, password } = values;
+    setIsloading(true);
 
     if (!isLoaded) return;
 
-    try {
-      const signUpAttempt = await signUp.attemptEmailAddressVerification({
+    await signIn
+      .attemptFirstFactor({
+        strategy: "reset_password_email_code",
         code,
-      });
+        password,
+      })
+      .then((res) => {
+        if (res.status === "complete") {
+          setActive({ session: res.createdSessionId });
+          toast.success("Password has been updated successfully");
+          router.replace("/dashboard");
+        }
+      })
+      .catch((error) => {
+        if (error?.errors[0]?.code === "verification_expired") {
+          setShowResendBtn(true);
+          return toast("Vefication code Expired", {
+            description: error?.errors[0]?.longMessage,
+          });
+        }
 
-      if (signUpAttempt.status === "complete") {
-        await setActive({ session: signUpAttempt.createdSessionId });
-
-        // toaster
-        toast.success("Success", {
-          description: "Your account has being verified ",
-        });
-
-        // router
-        router.push("/onboarding");
-      } else {
         toast("An error occurred", {
-          description: JSON.stringify(signUpAttempt, null, 2),
+          description: JSON.stringify(error?.errors[0]?.longMessage, null, 2),
         });
-        console.error(JSON.stringify(signUpAttempt, null, 2));
-      }
-    } catch (error: unknown) {
-      if (error?.errors[0]?.code === "verification_expired") {
-        setShowResendBtn(true);
-        return toast("Vefication code Expired", {
-          description: error?.errors[0]?.longMessage,
-        });
-      }
-
-      toast("An error occurred", {
-        description: JSON.stringify(error?.errors[0]?.longMessage, null, 2),
+        console.error("Error:", JSON.stringify(error, null, 2));
+      })
+      .finally(() => {
+        setIsloading(false);
       });
-      console.error("Error:", JSON.stringify(error, null, 2));
-    }
   };
 
-  const isLoading = form.formState.isSubmitting;
-
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 w-full max-w-2xl  mx-auto ">
-      <div className="flex flex-col">
-        {/* header */}
-
-        <div className="flex flex-col items-center gap-2 mb-4">
-          <a href="#" className="flex flex-col  items-center gap-2 font-medium">
-            <div className="flex size-8 items-center justify-center rounded-md">
-              <GalleryVerticalEnd className="size-6" />
-            </div>
-            <span className="sr-only">Acadea Inc.</span>
-          </a>
-          <h6 className="mb-2 text-2xl md:text-3xl">Welcome to Acadea inc.</h6>
-          <p className="text-sm text-left tracking-tight font-poppins dark:text-neutral-500 text-gray-600">
-            Finish up by verifying your account
-          </p>
-        </div>
-
-        {/* header */}
-
-        {/* form */}
+    <div className="flex items-center justify-center min-h-screen p-8">
+      <div className="flex flex-col gap-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleVerification)} className="">
-            <div className="grid gap-3">
-              <FormField
-                control={form.control}
-                name="code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base  font-normal dark:text-white ">
-                      Password reset code
-                    </FormLabel>
-
-                    <FormControl className="w-full ">
-                      <div className="">
-                        <InputOTP maxLength={6} {...field} className="">
-                          <InputOTPGroup>
-                            <InputOTPSlot index={0} />
-                            <InputOTPSlot index={1} />
-                            <InputOTPSlot index={2} />
-                            <InputOTPSlot index={3} />
-                            <InputOTPSlot index={4} />
-                            <InputOTPSlot index={5} />
-                          </InputOTPGroup>
-                        </InputOTP>
-                      </div>
-                    </FormControl>
-                    <FormDescription className="text-sm font-normal my-4  font-saira">
-                      Please enter the code sent to the Email Address your
-                      provided
-                    </FormDescription>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid gap-3">
-              <div className="grid gap-3">
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="tracking-wider text-sm">
-                        Password
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          id="password"
-                          type="password"
-                          placeholder="********"
-                          autoComplete="off"
-                          {...field}
-                        />
-                      </FormControl>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Link
-                  href="/forgot-password"
-                  className="text-sm text-right dark:text-neutral-400 hover:underline"
+          <form onSubmit={form.handleSubmit(handleVerification)}>
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col items-center gap-2">
+                <a
+                  href="#"
+                  className="flex flex-col items-center gap-2 font-medium"
                 >
-                  Forgot your password?
-                </Link>
+                  <div className="flex size-8 items-center justify-center rounded-md">
+                    <GalleryVerticalEnd className="size-6" />
+                  </div>
+                  <span className="sr-only">Acadea Inc.</span>
+                </a>
+                <h1 className="text-xl font-medium font-poppins-semibold  tracking-tight">
+                  Welcome to Acadea Inc.
+                </h1>
+                <div className="text-center text-sm tracking-wide dark:text-neutral-300">
+                  We’ll help you get back in{" "}
+                  <Link
+                    href="/login"
+                    className="underline underline-offset-4 dark:hover:text-neutral-200 hover:text-gray-600"
+                  >
+                    Sign in instead
+                  </Link>
+                </div>
+              </div>
+              <div className="flex flex-col gap-6">
+                {step === 1 && (
+                  <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base  font-normal dark:text-white ">
+                          Verification Code
+                        </FormLabel>
+
+                        <FormControl className="w-full ">
+                          <div className="">
+                            <InputOTP maxLength={6} {...field} className="">
+                              <InputOTPGroup>
+                                <InputOTPSlot index={0} />
+                                <InputOTPSlot index={1} />
+                                <InputOTPSlot index={2} />
+                                <InputOTPSlot index={3} />
+                                <InputOTPSlot index={4} />
+                                <InputOTPSlot index={5} />
+                              </InputOTPGroup>
+                            </InputOTP>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                {step === 2 && (
+                  <div className="flex flex-col space-y-4">
+                    <div className="grid gap-3 ">
+                      <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="tracking-wider text-sm">
+                              Password
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                id="password"
+                                type="password"
+                                placeholder="********"
+                                autoComplete="off"
+                                {...field}
+                              />
+                            </FormControl>
+
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid gap-3">
+                      <FormField
+                        control={form.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="tracking-wider text-sm">
+                              Confirm Password
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                id="password"
+                                type="password"
+                                placeholder="********"
+                                autoComplete="off"
+                                {...field}
+                              />
+                            </FormControl>
+
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                )}
+                {step !== 2 ? (
+                  <Button
+                    type="button"
+                    variant="default"
+                    className="w-full text-sm font-semibold tracking-wider"
+                    onClick={handleNextStep}
+                    disabled={
+                      !form.watch("code") || Boolean(form.formState.errors.code)
+                    }
+                  >
+                    Continue
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    variant="default"
+                    className="w-full text-sm font-semibold tracking-wider"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-x-3">
+                        <Spinner variant="button" size="xs" />
+                        <p className=" ">Updating password...</p>
+                      </div>
+                    ) : (
+                      "Update password"
+                    )}
+                  </Button>
+                )}
               </div>
             </div>
-
-            {!showResendBtn && (
-              <>
-                <Button
-                  variant="default"
-                  disabled={isLoading}
-                  className="w-full font-semibold tracking-wide "
-                >
-                  {isLoading ? (
-                    <div className="flex items-center gap-x-3">
-                      <Spinner variant="xs" />
-                      <p className=" ">Verifing...</p>
-                    </div>
-                  ) : (
-                    "Verify"
-                  )}
-                </Button>
-              </>
-            )}
           </form>
         </Form>
-        {/*  */}
-      </div>
-
-      {showResendBtn && (
-        <div className="mt-2">
-          <p className="text-sm dark:text-gray-400 text-gray-500 mb-2">
-            Get new Code
-          </p>
-          <Button variant={"outline"} onClick={handleResendCode}>
-            Resend code
-          </Button>
+        <div className="">
+          {showResendBtn && (
+            <div className="flex items-center justify-center gap-x-1 dark:text-neutral-300 text-muted-foreground *:[a]:hover:text-primary *:[a]:dark:hover:text-gray-300 text-center text-sm text-balance *:[a]:underline *:[a]:underline-offset-4">
+              <p>Didn&apos;t get the code ? </p>
+              <Button variant="link" className="text-sm">
+                Resend code
+              </Button>
+            </div>
+          )}
         </div>
-      )}
+        <div className="text-muted-foreground *:[a]:hover:text-primary *:[a]:dark:hover:text-gray-300 text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+          By clicking continue, you agree to our{" "}
+          <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+        </div>
+      </div>
     </div>
   );
 };
 
-export default OTPverification;
+export default Page;

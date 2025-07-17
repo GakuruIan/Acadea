@@ -63,7 +63,7 @@ const registerSchema = z
 
 const Page = () => {
   const [verifing, setVerifing] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { isLoaded, signUp } = useSignUp();
   const { isSignedIn } = useUser();
@@ -85,20 +85,28 @@ const Page = () => {
 
   const onSubmit = async (values: z.infer<typeof registerSchema>) => {
     const { email, password } = values;
+    setIsLoading(true);
 
-    if (!isLoaded) return <Loader />;
+    if (!isLoaded) {
+      setIsLoading(false);
+      return;
+    }
 
     return toast.promise(
       (async () => {
-        await signUp.create({
-          emailAddress: email,
-          password,
-        });
+        try {
+          await signUp.create({
+            emailAddress: email,
+            password,
+          });
 
-        await signUp.prepareEmailAddressVerification({
-          strategy: "email_code",
-        });
-        setVerifing(true);
+          await signUp.prepareEmailAddressVerification({
+            strategy: "email_code",
+          });
+          setVerifing(true);
+        } finally {
+          setIsLoading(false);
+        }
       })(),
       {
         loading: "Creating account...",
@@ -109,11 +117,11 @@ const Page = () => {
     );
   };
 
-  const isSubmitting = form.formState.isSubmitting;
-
   if (verifing) {
     return <Verification />;
   }
+
+  if (!isLoaded) return <Loader />;
 
   return (
     <div className="flex items-center justify-center min-h-screen p-8">
@@ -216,12 +224,13 @@ const Page = () => {
                   type="submit"
                   variant="default"
                   className="w-full text-sm font-semibold tracking-wider"
-                  disabled={isSubmitting}
+                  disabled={isLoading}
                 >
-                  {isSubmitting ? (
+                  {isLoading ? (
                     <div className="flex items-center gap-x-3">
                       <Spinner
-                        variant="xs"
+                        size="xs"
+                        variant="button"
                         classname="dark:text-neutral-400 dark:fill-neutral-600"
                       />
                       <p className=" ">Signing up...</p>

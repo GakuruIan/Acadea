@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Loader from "@/components/ui/Loader/Loader";
 import PasswordOTPverification from "@/components/ui/OTP/PasswordOTPverification";
+import Spinner from "@/components/ui/spinner/spinner";
 
 // toaster
 import { toast } from "sonner";
@@ -97,11 +98,11 @@ const Page = () => {
   // form submitting status
   const isSubmitting = form.formState.isSubmitting;
 
-  if (true) {
+  if (showOTP) {
     return <PasswordOTPverification />;
   }
 
-  if (isLoaded) {
+  if (!isLoaded) {
     return <Loader />;
   }
 
@@ -109,7 +110,7 @@ const Page = () => {
     <div className="flex items-center justify-center min-h-screen p-8">
       <div className="flex flex-col gap-6 max-w-md w-full">
         <Form {...form}>
-          <form>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center gap-2">
                 <a
@@ -150,6 +151,7 @@ const Page = () => {
                             type="email"
                             placeholder="m@example.com"
                             autoComplete="off"
+                            disabled={isSubmitting}
                             {...field}
                           />
                         </FormControl>
@@ -166,7 +168,14 @@ const Page = () => {
                   variant="default"
                   className="w-full text-sm font-semibold tracking-wider"
                 >
-                  Send reset link
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-x-3">
+                      <Spinner size="xs" variant="button" />
+                      <p className=" ">Sending link...</p>
+                    </div>
+                  ) : (
+                    "Get reset code"
+                  )}
                 </Button>
               </div>
             </div>

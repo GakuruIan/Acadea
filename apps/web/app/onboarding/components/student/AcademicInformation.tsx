@@ -54,11 +54,53 @@ const AcademicInformation = ({ form }: Props) => {
                       <SelectItem value="master">
                         Master&apos;s Degree
                       </SelectItem>
+                      <SelectItem value="phd">PHD</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
               </FormControl>
 
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <div className="mb-6">
+        <FormField
+          control={form.control}
+          name="studentEducationStatus"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="tracking-wider text-sm">
+                Education Status
+              </FormLabel>
+              <FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select your Education status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Status</SelectLabel>
+                      <SelectItem value="full_time">
+                        Currently Enrolled-Full Time
+                      </SelectItem>
+                      <SelectItem value="part_time">
+                        Currently Enrolled-Part Time
+                      </SelectItem>
+                      <SelectItem value="academic_break">
+                        Academic break
+                      </SelectItem>
+                      <SelectItem value="graduated">Graduated</SelectItem>
+                      <SelectItem value="dropped_out">Dropped out</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -93,7 +135,7 @@ const AcademicInformation = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="institution"
+          name="nameofInstitution"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">
@@ -194,18 +236,22 @@ const AcademicInformation = ({ form }: Props) => {
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Goals</SelectLabel>
-                      <SelectItem value="degree_completion">
-                        Degree Completion
+                      <SelectItem value="improve_grades">
+                        Improve Grades
                       </SelectItem>
-                      <SelectItem value="skill_building">
-                        Skill building
+                      <SelectItem value="exam_preparation">
+                        Exam Preparation
                       </SelectItem>
 
-                      <SelectItem value="career_change">
-                        Career change
+                      <SelectItem value="skill_development">
+                        Skill Development
                       </SelectItem>
-                      <SelectItem value="pass_exam">Pass Exam</SelectItem>
-                      <SelectItem value="get_job">Get a job</SelectItem>
+                      <SelectItem value="career_advancement">
+                        Career Advancement
+                      </SelectItem>
+                      <SelectItem value="personal_interest">
+                        Personal Interest
+                      </SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>

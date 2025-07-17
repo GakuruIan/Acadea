@@ -2,21 +2,23 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 interface props {
-  variant?: "xs" | "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
+  variant?: "button" | "page";
   classname?: string;
 }
 
-const spinner = ({ variant = "sm", classname }: props) => {
+const spinner = ({ size = "sm", variant = "page", classname }: props) => {
   return (
     <div className="">
       <svg
         aria-hidden="true"
         className={cn(
           "text-gray-200 dark:text-neutral-500/10 fill-neutral-900 dark:fill-neutral-200 animate-spin",
-          variant === "xs" && "size-4",
-          variant === "sm" && "size-8",
-          variant === "md" && "size-10",
-          variant === "lg" && "size-14",
+          size === "xs" && "size-4",
+          size === "sm" && "size-8",
+          size === "md" && "size-10",
+          size === "lg" && "size-14",
+          variant === "button" && "dark:text-neutral-500 dark:fill-neutral-900",
           classname
         )}
         viewBox="0 0 100 101"
