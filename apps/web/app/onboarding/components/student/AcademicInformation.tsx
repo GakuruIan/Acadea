@@ -30,7 +30,7 @@ const AcademicInformation = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="studentEducationLevel"
+          name="student_education_level"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">
@@ -69,7 +69,7 @@ const AcademicInformation = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="studentEducationStatus"
+          name="student_education_status"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">
@@ -110,7 +110,7 @@ const AcademicInformation = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="fieldOfStudy"
+          name="field_of_study"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">
@@ -135,7 +135,7 @@ const AcademicInformation = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="nameofInstitution"
+          name="name_of_institution"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">
@@ -160,7 +160,7 @@ const AcademicInformation = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="academicYear"
+          name="academic_year"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">
@@ -219,7 +219,7 @@ const AcademicInformation = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="academicGoals"
+          name="academic_goals"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">

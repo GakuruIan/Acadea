@@ -33,7 +33,7 @@ const BasicInfo = ({ form }: props) => {
           <div className="mb-6">
             <FormField
               control={form.control}
-              name="firstname"
+              name="first_name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="tracking-wider text-sm">
@@ -58,7 +58,7 @@ const BasicInfo = ({ form }: props) => {
           <div className="mb-6">
             <FormField
               control={form.control}
-              name="lastname"
+              name="last_name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="tracking-wider text-sm">
@@ -83,7 +83,7 @@ const BasicInfo = ({ form }: props) => {
           <div className="mb-6">
             <FormField
               control={form.control}
-              name="phonenumber"
+              name="phone_number"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="tracking-wider text-sm">

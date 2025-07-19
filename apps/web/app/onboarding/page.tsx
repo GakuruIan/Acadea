@@ -1,10 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 
-import type { Database } from "@repo/supabase-types";
-
-type StudentProfileInsert =
-  Database["public"]["Tables"]["student_profiles"]["Insert"];
+// tanstack hooks
+import { useCreateProfile } from "@/hooks/profile/useCreateProfile";
 
 import { motion } from "motion/react";
 
@@ -15,8 +13,7 @@ import { Button } from "@/components/ui/button";
 // form utils
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useForm, useWatch } from "react-hook-form";
-
+import { useForm, useWatch, SubmitHandler } from "react-hook-form";
 // validation schema
 import {
   studentSchema,
@@ -41,12 +38,11 @@ import CoursePreference from "./components/tutor/CoursePreference";
 import TeachingPreference from "./components/tutor/TeachingPreference";
 import BasicInfo from "./components/BasicInfo";
 import TutorReview from "./components/tutor/TutorReview";
-
 import RolePicker from "./components/RolePicker";
 import Loader from "@/components/ui/Loader/Loader";
-import { useRouter } from "next/navigation";
 
-import { supabaseClient } from "@/lib/supabase/client";
+// routing
+import { useRouter } from "next/navigation";
 
 const getStepConfig = (role: string) => {
   const steps = [
@@ -127,15 +123,17 @@ const getStepConfig = (role: string) => {
 type StudentFormSchema = z.infer<typeof studentSchema>;
 type TutorFormSchema = z.infer<typeof tutorSchema>;
 
+type FormValues = StudentFormSchema | TutorFormSchema;
+
 const getDefaultValues = (role: string) => {
   const roleDefaults = {
     role: "student",
   };
   const baseDefaults = {
-    firstname: "",
-    lastname: "",
+    first_name: "",
+    last_name: "",
     country: "",
-    phonenumber: "",
+    phone_number: "",
     photo: undefined,
   };
 
@@ -143,36 +141,36 @@ const getDefaultValues = (role: string) => {
     return {
       ...roleDefaults,
       ...baseDefaults,
-      studentEducationLevel: undefined,
-      fieldOfStudy: "",
-      institution: "",
-      academicYear: "",
-      deviceAccess: undefined,
-      preferredPace: undefined,
-      focusDuration: undefined,
-      engagementPreference: undefined,
-      internetAccessQuality: undefined,
-      academicGoals: undefined,
-      languagePreference: undefined,
-      learningStyle: undefined,
-      preferredSchedule: undefined,
+      student_education_level: undefined,
+      field_of_study: "",
+      name_of_institution: "",
+      academic_year: "",
+      device_access: undefined,
+      preferred_pace: undefined,
+      focus_duration: undefined,
+      engagement_preference: undefined,
+      internet_access_quality: undefined,
+      academic_goals: undefined,
+      language_preference: undefined,
+      learning_style: undefined,
+      preferred_schedule: undefined,
       interests: [] as string[],
     };
   } else if (role === "tutor") {
     return {
       ...roleDefaults,
       ...baseDefaults,
-      tutorEducationLevel: undefined,
-      yearsOfTeaching: "",
-      previousInstitution: "",
-      preferredStudentLevel: undefined,
-      schedulePreference: undefined,
-      deliveryFormat: undefined,
-      studentEvaluationMethod: undefined,
-      classFormat: undefined,
-      outsideClassInteraction: undefined,
-      teachingLanguages: undefined,
-      coursePreferences: [] as string[],
+      tutor_education_level: undefined,
+      years_of_teaching: "",
+      previous_institution: "",
+      preferred_student_level: undefined,
+      schedule_preference: undefined,
+      delivery_format: undefined,
+      student_evaluation_method: undefined,
+      class_format: undefined,
+      outside_class_interaction: undefined,
+      teaching_languages: undefined,
+      course_preferences: [] as string[],
       cv: undefined as File | undefined,
       certifications: [] as File[],
     };
@@ -185,10 +183,10 @@ const Page = () => {
   const [currentRole, setCurrentRole] = useState<"student" | "tutor">(
     "student"
   );
+  const createProfileMutation = useCreateProfile();
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
-  const supabase = supabaseClient();
 
   const { isLoaded, isSignedIn } = useUser();
 
@@ -315,35 +313,34 @@ const Page = () => {
     return <Loader />;
   }
 
-  const onSubmit = async (values: z.infer<StudentFormSchema>) => {
+  const onSubmit: SubmitHandler<FormValues> = async (
+    values: StudentFormSchema | TutorFormSchema
+  ) => {
     const role = form.getValues("role");
-
     setIsLoading(true);
 
-    const formData = form.getValues();
-
-    console.log(formData);
-    toast.promise(
-      (async () => {
-        try {
-          if (role === "student") {
-            const { error } = await supabase
-              .from("student_profiles")
-              .insert(formData);
-            if (error) {
-              throw error;
-            }
+    if (role === "student") {
+      const studentValues = form.getValues() as StudentFormSchema;
+      toast.promise(
+        (async () => {
+          try {
+            await createProfileMutation.mutateAsync(studentValues);
+            router.push("/dashboard");
+          } catch (err: any) {
+            console.error(err);
+            throw err;
+          } finally {
+            setIsLoading(false);
           }
-        } catch (error) {
-          console.log(error);
+        })(),
+        {
+          loading: "Creating student profile...",
+          success: "Profile created!",
+          error: (err) => err?.message || "Failed to submit",
         }
-      })(),
-      {
-        loading: "Submitting...",
-        success: "User data saved successfully",
-        error: (error) => error.message,
-      }
-    );
+      );
+    }
+    // TODO: add the tutor part
   };
 
   return (

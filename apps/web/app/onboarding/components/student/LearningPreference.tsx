@@ -31,7 +31,7 @@ const LearningPreference = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="languagePreference"
+          name="language_preference"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">
@@ -68,7 +68,7 @@ const LearningPreference = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="learningStyle"
+          name="learning_style"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">
@@ -107,7 +107,7 @@ const LearningPreference = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="preferredSchedule"
+          name="preferred_schedule"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">
@@ -139,7 +139,7 @@ const LearningPreference = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="deviceAccess"
+          name="device_access"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">
@@ -171,7 +171,7 @@ const LearningPreference = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="internetAccessQuality"
+          name="internet_access_quality"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">
@@ -202,7 +202,7 @@ const LearningPreference = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="preferredPace"
+          name="preferred_pace"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">
@@ -233,7 +233,7 @@ const LearningPreference = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="focusDuration"
+          name="focus_duration"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">
@@ -248,10 +248,10 @@ const LearningPreference = ({ form }: Props) => {
                     <SelectValue placeholder="Select your typical focus span" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="15">15 minutes</SelectItem>
-                    <SelectItem value="30">30 minutes</SelectItem>
-                    <SelectItem value="60">1 hour</SelectItem>
-                    <SelectItem value="90+">more than hour</SelectItem>
+                    <SelectItem value="SHORT">15 minutes</SelectItem>
+                    <SelectItem value="MEDIUM">30 minutes</SelectItem>
+                    <SelectItem value="LONG">1 Hour</SelectItem>
+                    <SelectItem value="EXTRA_LONG">90+ minutes</SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -264,7 +264,7 @@ const LearningPreference = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="engagementPreference"
+          name="engagement_preference"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">

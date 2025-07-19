@@ -152,11 +152,11 @@ const StudentReview = ({ form }: props) => {
         <AccordionContent className="flex flex-col gap-y-6 text-balance">
           <div className="flex items-center justify-between">
             <p>Fullname</p>
-            <p>{`${form.getValues("firstname")} ${form.getValues("lastname")}`}</p>
+            <p>{`${form.getValues("first_name")} ${form.getValues("last_name")}`}</p>
           </div>
           <div className="flex items-center justify-between">
             <p>Phone number</p>
-            <p>{form.getValues("phonenumber")}</p>
+            <p>{form.getValues("phone_number")}</p>
           </div>
           <div className="flex items-center justify-between">
             <p>Country</p>
@@ -174,32 +174,34 @@ const StudentReview = ({ form }: props) => {
           <div className="flex items-center justify-between">
             <p>Education Level</p>
             <p>
-              {getEducationLevelLabel(form.getValues("studentEducationLevel"))}
+              {getEducationLevelLabel(
+                form.getValues("student_education_level")
+              )}
             </p>
           </div>
           <div className="flex items-center justify-between">
             <p>Education Status</p>
             <p>
               {getEducationStatusLabel(
-                form.getValues("studentEducationStatus")
+                form.getValues("student_education_status")
               )}
             </p>
           </div>
           <div className="flex items-center justify-between">
             <p>Field of study</p>
-            <p>{form.getValues("fieldOfStudy")}</p>
+            <p>{form.getValues("field_of_study")}</p>
           </div>
           <div className="flex items-center justify-between">
             <p>Name of school</p>
-            <p>{form.getValues("nameofInstitution")}</p>
+            <p>{form.getValues("name_of_institution")}</p>
           </div>
           <div className="flex items-center justify-between">
             <p>Academic year</p>
-            <p>{form.getValues("academicYear")}</p>
+            <p>{form.getValues("academic_year")}</p>
           </div>
           <div className="flex items-center justify-between">
             <p>Main Academic goal</p>
-            <p>{getAcademicGoalsLabel(form.getValues("academicGoals"))}</p>
+            <p>{getAcademicGoalsLabel(form.getValues("academic_goals"))}</p>
           </div>
         </AccordionContent>
       </AccordionItem>
@@ -208,37 +210,39 @@ const StudentReview = ({ form }: props) => {
         <AccordionContent className="flex flex-col gap-4 text-balance">
           <div className="flex items-center justify-between">
             <p>Learning Language Preference</p>
-            <p>{getLanguageLabel(form.getValues("languagePreference"))}</p>
+            <p>{getLanguageLabel(form.getValues("language_preference"))}</p>
           </div>
           <div className="flex items-center justify-between">
             <p>Preferred Learning Style</p>
-            <p>{getLearningStyleLabel(form.getValues("learningStyle"))}</p>
+            <p>{getLearningStyleLabel(form.getValues("learning_style"))}</p>
           </div>
           <div className="flex items-center justify-between">
             <p>When You Prefer to Study</p>
-            <p>{getScheduleLabel(form.getValues("preferredSchedule"))}</p>
+            <p>{getScheduleLabel(form.getValues("preferred_schedule"))}</p>
           </div>
           <div className="flex items-center justify-between">
             <p>Device Will You Use to Learn</p>
-            <p>{getDeviceLabel(form.getValues("deviceAccess"))}</p>
+            <p>{getDeviceLabel(form.getValues("device_access"))}</p>
           </div>
           <div className="flex items-center justify-between">
             <p>Quality of Your Internet Connection</p>
             <p>
-              {getInternetQualityLabel(form.getValues("internetAccessQuality"))}
+              {getInternetQualityLabel(
+                form.getValues("internet_access_quality")
+              )}
             </p>
           </div>
           <div className="flex items-center justify-between">
             <p>Preferred Learning Speed</p>
-            <p>{getPaceLabel(form.getValues("preferredPace"))}</p>
+            <p>{getPaceLabel(form.getValues("preferred_pace"))}</p>
           </div>
           <div className="flex items-center justify-between">
             <p>How long you stay focused during a learning session</p>
-            <p>{getFocusDurationLabel(form.getValues("focusDuration"))}</p>
+            <p>{getFocusDurationLabel(form.getValues("focus_duration"))}</p>
           </div>
           <div className="flex items-center justify-between">
             <p>How Do You Prefer to Stay Engaged During Learning?</p>
-            <p>{getEngagementLabel(form.getValues("engagementPreference"))}</p>
+            <p>{getEngagementLabel(form.getValues("engagement_preference"))}</p>
           </div>
         </AccordionContent>
       </AccordionItem>

@@ -6,6 +6,9 @@ import { Toaster } from "sonner";
 
 import { ClerkProvider } from "@clerk/nextjs";
 
+// tanstack
+import { ReactQueryClientProvider } from "@/providers/ReactQueryProvider";
+
 const poppinsBold = localFont({
   src: "./fonts/Poppins-Bold.woff",
   variable: "--font-poppins-bold",
@@ -46,14 +49,16 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body
-          className={`${poppinsRegular.variable} ${poppinsLight.variable}  ${poppinsSemiBold.variable} ${poppinsBold.variable} ${saira.variable} ${sairaLight.variable} `}
-        >
-          {children}
-          <Toaster />
-        </body>
-      </html>
+      <ReactQueryClientProvider>
+        <html lang="en">
+          <body
+            className={`${poppinsRegular.variable} ${poppinsLight.variable}  ${poppinsSemiBold.variable} ${poppinsBold.variable} ${saira.variable} ${sairaLight.variable} `}
+          >
+            {children}
+            <Toaster />
+          </body>
+        </html>
+      </ReactQueryClientProvider>
     </ClerkProvider>
   );
 }

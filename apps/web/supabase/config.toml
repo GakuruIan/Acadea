@@ -1,3 +1,0 @@
-[auth.third_party.clerk]
-enabled = true
-domain = "https://talented-jay-97.clerk.accounts.dev"
