@@ -1,0 +1,155 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// enum
+enum Role {
+  student
+  tutor
+}
+
+enum EducationLevel {
+  high_school
+  bachelor
+  master
+  phd
+}
+
+enum EducationStatus {
+  graduated
+  full_time
+  part_time
+  academic_break
+  dropped_out
+}
+
+enum AcademicGoal {
+  improve_grades
+  exam_preparation
+  skill_development
+  career_advancement
+  personal_interest
+}
+
+enum AcademicYear {
+  highschool_freshman
+  highschool_sophomore
+  highschool_junior
+  highschool_senior
+  undergraduate_year1
+  undergraduate_year2
+  undergraduate_year3
+  undergraduate_year4
+  postgraduate
+  not_applicable
+}
+
+enum Language {
+  english
+  spanish
+  french
+  arabic
+  other
+}
+
+enum LearningStyle {
+  visual
+  auditory
+  kinesthetic
+  reading_writing
+  live_classes
+  self_paced
+  group_discussion
+}
+
+enum Schedule {
+  morning
+  afternoon
+  evening
+  flexible
+}
+
+enum Device {
+  mobile
+  laptop
+  tablet
+  desktop
+}
+
+enum InternetQuality {
+  poor
+  moderate
+  reliable
+}
+
+enum Pace {
+  slow
+  normal
+  fast
+}
+
+enum EngagementMode {
+  quizzes_and_test
+  assignment_and_projects
+  discussions
+  live_oral_questioning
+  peer_review
+}
+
+enum FocusDuration {
+  SHORT
+  MEDIUM
+  LONG
+  EXTRA_LONG
+}
+
+model User {
+  id             String          @id @unique @default(uuid())
+  clerkId        String          @unique
+  email          String          @unique
+  verified       Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  studentProfile StudentProfile? @relation("StudentProfileRelation")
+}
+
+model StudentProfile {
+  id                       String          @id @default(uuid())
+  user_id                  String          @unique
+  first_name               String
+  last_name                String
+  phone_number             String
+  role                     Role
+  photo                    String?
+  country                  String
+  student_education_level  EducationLevel
+  field_of_study           String
+  student_education_status EducationStatus
+  academic_goals           AcademicGoal
+  name_of_institution      String
+  academic_year            AcademicYear
+  language_preference      Language
+  learning_style           LearningStyle
+  preferred_schedule       Schedule
+  device_access            Device
+  internet_access_quality  InternetQuality
+  preferred_pace           Pace
+  focus_duration           FocusDuration
+  engagement_preference    EngagementMode
+  interests                String[]        @default([])
+  has_completed_onboarding Boolean         @default(false)
+  created_at               DateTime        @default(now())
+  updated_at               DateTime        @updatedAt
+  owner                    User            @relation("StudentProfileRelation", fields: [user_id], references: [clerkId], onDelete: Cascade)
+}

@@ -12,10 +12,9 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "gen:supabase-types": "dotenv -e .env -- supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > packages/supabase-types/database.types.ts"
-
-
   },
   "devDependencies": {
+    "@types/node": "^22.15.3",
     "cross-env": "^7.0.3",
     "prettier": "^3.6.0",
     "turbo": "^2.5.4",
