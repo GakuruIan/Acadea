@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 
 // tanstack hooks
 import { useCreateProfile } from "@/hooks/profile/useCreateProfile";
+import { useCheckOnboardingStatus } from "@/hooks/profile/useCheckOnboardingStatus";
 
 import { motion } from "motion/react";
 
@@ -39,7 +40,10 @@ import TeachingPreference from "./components/tutor/TeachingPreference";
 import BasicInfo from "./components/BasicInfo";
 import TutorReview from "./components/tutor/TutorReview";
 import RolePicker from "./components/RolePicker";
+
+//
 import Loader from "@/components/ui/Loader/Loader";
+import Spinner from "@/components/ui/spinner/spinner";
 
 // routing
 import { useRouter } from "next/navigation";
@@ -184,17 +188,20 @@ const Page = () => {
     "student"
   );
   const createProfileMutation = useCreateProfile();
+
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
 
-  const { isLoaded, isSignedIn } = useUser();
+  const { isLoaded, isSignedIn, user } = useUser();
 
-  useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      router.replace("/login");
-    }
-  }, [isSignedIn, router, isLoaded]);
+  const {
+    data: onboardingStatus,
+    isLoading: isCheckingOnboarding,
+    isError: onboardingError,
+  } = useCheckOnboardingStatus(user?.id, {
+    enabled: isLoaded && isSignedIn,
+  });
 
   const schema = React.useMemo(() => {
     return getValidationSchema(currentRole, currentStep + 1);
@@ -209,6 +216,39 @@ const Page = () => {
       | TutorFormSchema,
   });
 
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.replace("/login");
+    }
+
+    if (isLoaded && isSignedIn && onboardingStatus && !isCheckingOnboarding) {
+      console.log(onboardingStatus);
+      if (onboardingStatus.has_completed_onboarding) {
+        const redirectPath =
+          onboardingStatus.role === "tutor"
+            ? "/tutor-dashboard"
+            : "/student-dashboard";
+        router.replace(redirectPath);
+        return;
+      }
+
+      if (onboardingStatus.role && !onboardingStatus.hasCompletedOnboarding) {
+        setCurrentRole(onboardingStatus.role);
+        form.reset({
+          ...getDefaultValues(onboardingStatus.role),
+          role: onboardingStatus.role,
+        });
+      }
+    }
+  }, [
+    form,
+    isLoaded,
+    isSignedIn,
+    onboardingStatus,
+    isCheckingOnboarding,
+    router,
+  ]);
+
   const watchedRole = useWatch({
     control: form.control,
     name: "role",
@@ -216,14 +256,11 @@ const Page = () => {
 
   useEffect(() => {
     if (watchedRole && watchedRole !== currentRole) {
-      const prevValues = form.getValues();
-
       setCurrentRole(watchedRole);
       setCurrentStep(0);
 
       form.reset({
         ...getDefaultValues(watchedRole),
-        ...prevValues,
         role: watchedRole,
       });
     }
@@ -259,7 +296,8 @@ const Page = () => {
       }
     }
   };
-  const handleBack = () => {
+  const handleBack = (e: React.FormEvent) => {
+    e.preventDefault();
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
@@ -309,7 +347,7 @@ const Page = () => {
 
   const isLastStep = currentStep === steps.length - 1;
 
-  if (!isLoaded) {
+  if (!isLoaded || isCheckingOnboarding) {
     return <Loader />;
   }
 
@@ -340,7 +378,27 @@ const Page = () => {
         }
       );
     }
-    // TODO: add the tutor part
+    if (role === "tutor") {
+      const tutorValues = values as TutorFormSchema;
+      toast.promise(
+        (async () => {
+          try {
+            await createProfileMutation.mutateAsync(tutorValues);
+            router.push("/dashboard");
+          } catch (err: any) {
+            console.log(err);
+            throw err;
+          } finally {
+            setIsLoading(false);
+          }
+        })(),
+        {
+          loading: "Creating tutor profile...",
+          success: "Profile created!",
+          error: (err) => err?.message || "Failed to submit",
+        }
+      );
+    }
   };
 
   return (
@@ -375,11 +433,18 @@ const Page = () => {
 
           <div className="">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                encType="multipart/form-data"
+              >
                 {renderStepContent()}
                 <div className="flex items-center justify-between mt-4 w-full">
                   {currentStep > 0 && (
-                    <Button onClick={handleBack} variant="outline">
+                    <Button
+                      type="button"
+                      onClick={handleBack}
+                      variant="outline"
+                    >
                       <ArrowLeft size={16} className="" />
                       Back
                     </Button>
@@ -391,7 +456,14 @@ const Page = () => {
                       className="flex justify-end"
                       variant="default"
                     >
-                      Submit
+                      {isLoading ? (
+                        <div className="flex items-center gap-x-3">
+                          <Spinner size="xs" variant="button" />
+                          <p className=" ">Submitting...</p>
+                        </div>
+                      ) : (
+                        "Submit"
+                      )}
                     </Button>
                   ) : (
                     <Button

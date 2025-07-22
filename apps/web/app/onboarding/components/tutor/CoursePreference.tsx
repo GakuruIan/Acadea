@@ -48,7 +48,7 @@ const CoursePreference = ({ control }: InterestProps) => {
     <div>
       <FormField
         control={control}
-        name="coursePreferences"
+        name="course_preferences"
         render={({ field }) => (
           <FormItem>
             <FormLabel className="tracking-wider text-sm mb-2">

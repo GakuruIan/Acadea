@@ -9,6 +9,9 @@ import { ClerkProvider } from "@clerk/nextjs";
 // tanstack
 import { ReactQueryClientProvider } from "@/providers/ReactQueryProvider";
 
+// theming
+import { ThemeProvider } from "@/providers/theme-provider";
+
 const poppinsBold = localFont({
   src: "./fonts/Poppins-Bold.woff",
   variable: "--font-poppins-bold",
@@ -54,7 +57,14 @@ export default function RootLayout({
           <body
             className={`${poppinsRegular.variable} ${poppinsLight.variable}  ${poppinsSemiBold.variable} ${poppinsBold.variable} ${saira.variable} ${sairaLight.variable} `}
           >
-            {children}
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem={false}
+              storageKey="acadea-theme"
+            >
+              {children}
+            </ThemeProvider>
             <Toaster />
           </body>
         </html>

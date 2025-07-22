@@ -31,7 +31,7 @@ const TeachingExperience = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="tutorEducationLevel"
+          name="tutor_education_level"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">
@@ -70,7 +70,7 @@ const TeachingExperience = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="yearsOfTeaching"
+          name="years_of_teaching"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">
@@ -95,7 +95,7 @@ const TeachingExperience = ({ form }: Props) => {
       <div className="mb-6">
         <FormField
           control={form.control}
-          name="previousInstitution"
+          name="previous_institution"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="tracking-wider text-sm">

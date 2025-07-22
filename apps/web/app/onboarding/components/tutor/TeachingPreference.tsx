@@ -27,10 +27,11 @@ const TeachingPreference = ({ form }: props) => {
   return (
     <div>
       <div className="flex flex-col gap-6">
+        {/* preferred student leve */}
         <div className="mb-1">
           <FormField
             control={form.control}
-            name="preferredStudentLevel"
+            name="preferred_student_level"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="tracking-wider text-sm">
@@ -66,10 +67,11 @@ const TeachingPreference = ({ form }: props) => {
           />
         </div>
 
+        {/* schedule preference */}
         <div className="mb-1">
           <FormField
             control={form.control}
-            name="schedulePreference"
+            name="schedule_preference"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="tracking-wider text-sm">
@@ -96,10 +98,12 @@ const TeachingPreference = ({ form }: props) => {
             )}
           />
         </div>
+
+        {/* delivery format */}
         <div className="mb-1">
           <FormField
             control={form.control}
-            name="deliveryFormat"
+            name="delivery_format"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="tracking-wider text-sm">
@@ -116,7 +120,7 @@ const TeachingPreference = ({ form }: props) => {
                     <SelectContent>
                       <SelectItem value="live">Live classes</SelectItem>
                       <SelectItem value="recorded">Pre-record</SelectItem>
-                      <SelectItem value="text-base">Text base</SelectItem>
+                      <SelectItem value="text_base">Text base</SelectItem>
                       <SelectItem value="blended">Blended</SelectItem>
                     </SelectContent>
                   </Select>
@@ -127,10 +131,11 @@ const TeachingPreference = ({ form }: props) => {
           />
         </div>
 
+        {/* student evaluation */}
         <div className="mb-1">
           <FormField
             control={form.control}
-            name="studentEvaluationMethod"
+            name="student_evaluation_method"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="tracking-wider text-sm">
@@ -167,10 +172,11 @@ const TeachingPreference = ({ form }: props) => {
           />
         </div>
 
+        {/* class format */}
         <div className="mb-1">
           <FormField
             control={form.control}
-            name="classFormat"
+            name="class_format"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="tracking-wider text-sm">
@@ -204,10 +210,11 @@ const TeachingPreference = ({ form }: props) => {
           />
         </div>
 
+        {/* outside class interface */}
         <div className="mb-1">
           <FormField
             control={form.control}
-            name="outsideClassInteraction"
+            name="outside_class_interaction"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="tracking-wider text-sm">
@@ -238,10 +245,11 @@ const TeachingPreference = ({ form }: props) => {
           />
         </div>
 
+        {/* teaching languages */}
         <div className="mb-1">
           <FormField
             control={form.control}
-            name="teachingLanguages"
+            name="teaching_languages"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="tracking-wider text-sm">

@@ -245,7 +245,7 @@ const Page = () => {
                     {isLoading ? (
                       <div className="flex items-center gap-x-3">
                         <Spinner size="xs" variant="button" />
-                        <p className=" ">Signing up...</p>
+                        <p className=" ">Signing in...</p>
                       </div>
                     ) : (
                       "Sign in"

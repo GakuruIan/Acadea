@@ -114,6 +114,59 @@ enum FocusDuration {
   EXTRA_LONG
 }
 
+// tutor enums
+enum PreferredStudentLevel {
+  beginner
+  intermediate
+  advanced
+  all_levels
+}
+
+enum TutorEducationLevel {
+  diploma
+  bachelors
+  masters
+  phd
+}
+
+enum DeliveryFormat {
+  live
+  recorded
+  text_base
+  blended
+}
+
+enum EvaluationMethod {
+  quizzes_and_test
+  assignment_and_projects
+  discussions
+  live_oral_questioning
+  peer_review
+}
+
+enum ClassFormat {
+  one_on_one
+  small_class
+  medium_class
+  large_class
+}
+
+enum OutsideClassInteraction {
+  lms_chat
+  email
+  forum
+  video_feedback
+  office_hours
+}
+
+enum TeachingLanguage {
+  english
+  spanish
+  french
+  arabic
+  other
+}
+
 model User {
   id             String          @id @unique @default(uuid())
   clerkId        String          @unique
@@ -122,6 +175,7 @@ model User {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   studentProfile StudentProfile? @relation("StudentProfileRelation")
+  tutorProfile   TutorProfile?   @relation("TutorProfileRelation")
 }
 
 model StudentProfile {
@@ -130,8 +184,9 @@ model StudentProfile {
   first_name               String
   last_name                String
   phone_number             String
-  role                     Role
+  role                     Role            @default(student)
   photo                    String?
+  photoId                  String?         @unique
   country                  String
   student_education_level  EducationLevel
   field_of_study           String
@@ -152,4 +207,46 @@ model StudentProfile {
   created_at               DateTime        @default(now())
   updated_at               DateTime        @updatedAt
   owner                    User            @relation("StudentProfileRelation", fields: [user_id], references: [clerkId], onDelete: Cascade)
+}
+
+model TutorProfile {
+  id                        String                  @id @default(cuid())
+  first_name                String                  @db.VarChar(50)
+  last_name                 String                  @db.VarChar(50)
+  phone_number              String                  @unique
+  country                   String
+  role                      Role                    @default(tutor)
+  photo                     String?
+  photoId                   String?
+  tutor_education_level     TutorEducationLevel
+  preferred_student_level   PreferredStudentLevel
+  schedule_preference       Schedule
+  years_of_teaching         Int
+  previous_institution      String
+  delivery_format           DeliveryFormat
+  student_evaluation_method EvaluationMethod
+  class_format              ClassFormat
+  outside_class_interaction OutsideClassInteraction
+  teaching_languages        TeachingLanguage
+  course_preferences        String[]
+  cv                        String
+  cvId                      String?
+  certifications            Certification[]
+  has_completed_onboarding  Boolean                 @default(false)
+  is_account_verified       Boolean                 @default(false)
+
+  // Relations
+  owner     User     @relation("TutorProfileRelation", fields: [user_id], references: [clerkId], onDelete: Cascade)
+  user_id   String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Certification {
+  id        String       @id @default(uuid())
+  url       String
+  fileId    String
+  tutorId   String
+  tutor     TutorProfile @relation(fields: [tutorId], references: [id])
+  createdAt DateTime     @default(now())
 }

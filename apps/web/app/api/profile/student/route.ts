@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@acadea/database";
-import { StudentData, studentSchema, TutorData } from "@/zodSchemas/zodSchemas";
+import { studentSchema } from "@/zodSchemas/zodSchemas";
+
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,16 +13,44 @@ export async function POST(req: NextRequest) {
       return new NextResponse("User ID is required", { status: 401 });
     }
 
-    const body = await req.json();
+    const formData = await req.formData();
 
-    if (!body.role) {
+    // role validation
+    const role = formData.get("role");
+    if (!role) {
       return NextResponse.json({ error: "Role is required" }, { status: 400 });
     }
 
-    const { role } = body;
+    const rawData: Record<string, any> = {};
+
+    for (const [key, value] of formData.entries()) {
+      if (key === "photo") {
+        rawData[key] = value;
+        continue;
+      }
+
+      if (key.endsWith("[]")) {
+        const trimmedKey = key.replace("[]", "");
+        if (!rawData[trimmedKey]) rawData[trimmedKey] = [];
+        rawData[trimmedKey].push(value);
+      } else {
+        rawData[key] = value;
+      }
+    }
+
+    let uploadResult;
+
+    const photo = formData.get("photo") as File | null;
+    if (photo) {
+      const result = await uploadToCloudinary(photo, {
+        folder: `acadea/${role}_profiles`,
+        resource_type: "image",
+      });
+      uploadResult = Array.isArray(result) ? result[0] : result;
+    }
 
     if (role === "student") {
-      const validatedData = studentSchema.parse(body);
+      const validatedData = studentSchema.parse(rawData);
 
       const { photo, ...dataForDB } = validatedData;
 
@@ -40,6 +70,8 @@ export async function POST(req: NextRequest) {
         data: {
           ...dataForDB,
           has_completed_onboarding: true,
+          photo: uploadResult?.secure_url || "",
+          photoId: uploadResult?.public_id || "",
           owner: {
             connect: {
               clerkId: userId,
@@ -73,6 +105,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Profile already exists" },
         { status: 409 }
+      );
+    }
+
+    // Handle file upload errors
+    if (
+      error instanceof Error &&
+      error.message.includes("Invalid certification upload")
+    ) {
+      return NextResponse.json(
+        { error: "Failed to upload one or more certification files" },
+        { status: 500 }
       );
     }
 

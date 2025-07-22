@@ -385,14 +385,26 @@ export const tutorSchema = basicSchema.extend({
     ["diploma", "bachelors", "masters", "phd"],
     "Education level is required"
   ),
-  years_of_teaching: z.number(),
+  years_of_teaching: z.coerce
+    .number("Please enter a valid number")
+    .min(1, "Must be at least 1 year")
+    .max(50, "Too many years of experience"),
   previous_institution: z
     .string()
     .trim()
     .min(1, "Previous institution is required")
     .max(100, "Institution name cannot be more 100 characters"),
-  preferred_format: z.enum(
-    ["live", "recorded", "text-base", "blended"],
+
+  preferred_student_level: z.enum(
+    ["beginner", "intermediate", "advanced", "all_levels"],
+    "Preferred student Level is required"
+  ),
+  schedule_preference: z.enum(
+    ["morning", "afternoon", "evening", "flexible"],
+    "Schedule preference in required"
+  ),
+  delivery_format: z.enum(
+    ["live", "recorded", "text_base", "blended"],
     "Delivery format is required"
   ),
   student_evaluation_method: z.enum(
@@ -417,6 +429,7 @@ export const tutorSchema = basicSchema.extend({
     ["english", "spanish", "french", "arabic", "other"],
     "Teaching Language is required"
   ),
+
   course_preferences: z
     .array(z.string())
     .min(3, "You must select at least 3 interests"),
